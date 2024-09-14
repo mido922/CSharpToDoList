@@ -5,6 +5,7 @@ string[] toDoTasks = [];
 string[] toDoTaskStatus = [];
 string[] tempArray = [];
 string[] tempArray2 = [];
+int a;
 
 while (true)
 {
@@ -20,15 +21,27 @@ while (true)
     switch (userInput)
     {
         case "1":
-            Console.WriteLine("\n Here is a list of all tasks: \n");
+            if(toDoTasks.Length == 0)
+            {
+                Console.WriteLine("You have no tasks.");
+                break;
+            }
+            Console.WriteLine("\nHere is a list of all tasks: \n");
             for (int i = 0; i < (toDoTasks.Length); i=i+1)
             {
                 Console.WriteLine($"{i}) {toDoTasks[i]}: {toDoTaskStatus[i]} ");
             }
-            Console.WriteLine("-------------------------------");
             break;
+
         case "2":
-            Console.WriteLine("Which task would you like to change the status of?");
+            if (toDoTasks.Length == 0)
+            {
+                Console.WriteLine("You have no tasks.");
+                break;
+            }
+
+            Console.WriteLine("Which task would you like to change the status of? Type -1 to exit.");
+
             for (int i = 0; i < toDoTasks.Length; i=i+1)
             {
                 Console.WriteLine($"{i}) {toDoTasks[i]}: {toDoTaskStatus[i]} ");
@@ -36,7 +49,16 @@ while (true)
             while (true)
             {
                 userInput = Console.ReadLine();
-                if (Convert.ToInt32(userInput) > toDoTasks.Length || Convert.ToInt32(userInput) < 0)
+
+                if (userInput == "-1")
+                {
+                    break;
+                }
+                else if (!Int32.TryParse(userInput, out a) ||
+                        Convert.ToInt32(userInput) >= toDoTasks.Length ||
+                        Convert.ToInt32(userInput) < 0 ||
+                        userInput == ""
+                        )
                 {
                     Console.WriteLine("That's not a valid input. Please try again.");
                     continue;
@@ -56,34 +78,79 @@ while (true)
             }
             break;
         case "3":
-            Console.WriteLine("What would you like to add to your To-Do List?\n");
-            userInput = Console.ReadLine();
-            toDoTasks = toDoTasks.Append(userInput).ToArray();
-            toDoTaskStatus = toDoTaskStatus.Append("Unfinished.").ToArray();
+            Console.WriteLine("What would you like to add to your To-Do List? Type -1 to exit.\n");
+
+            while (true)
+            {
+                userInput = Console.ReadLine();
+
+                if (userInput == "-1")
+                {
+                    break;
+                }
+                else if (Int32.TryParse(userInput, out a) ||
+                    userInput == ""
+                    )
+                {
+                    Console.WriteLine("That's not a valid input. Please try again.");
+                    continue;
+                }
+                else
+                {
+                    toDoTasks = toDoTasks.Append(userInput).ToArray();
+                    toDoTaskStatus = toDoTaskStatus.Append("Unfinished.").ToArray();
+                    break;
+                }
+            }
             break;
         case "4":
-            Console.WriteLine("What would you like to remove from your To-Do List?\n");
+            if (toDoTasks.Length == 0)
+            {
+                Console.WriteLine("You have no tasks.");
+                break;
+            }
+            Console.WriteLine("What would you like to remove from your To-Do List? Type -1 to exit.\n");
             for (int i = 0; i < (toDoTasks.Length); i = i + 1)
             {
                 Console.WriteLine($"{i}) {toDoTasks[i]}: {toDoTaskStatus[i]} ");
             }
-            userInput = Console.ReadLine();
-            toDoTasks[Convert.ToInt32(userInput)] = "";
-            toDoTaskStatus[Convert.ToInt32(userInput)] = "";
 
-            for(int i = 0; i < (toDoTasks.Length); i = i + 1)
+            while (true)
             {
-                if (toDoTasks[i] != "")
+                userInput = Console.ReadLine();
+
+                if (userInput == "-1")
                 {
-                    tempArray = tempArray.Append(toDoTasks[i]).ToArray();
-                    tempArray2 = tempArray2.Append(toDoTaskStatus[i]).ToArray();
-                }    
+                    break;
+                }
+                if (!Int32.TryParse(userInput, out a) ||
+                    Convert.ToInt32(userInput) >= toDoTasks.Length ||
+                    Convert.ToInt32(userInput) < 0 ||
+                    userInput == ""
+                    )
+                {
+                    Console.WriteLine("That's not a valid input. Please try again.");
+                    continue;
+                }
+                else
+                {
+                    toDoTasks[Convert.ToInt32(userInput)] = "";
+                    toDoTaskStatus[Convert.ToInt32(userInput)] = "";
+
+                    for (int i = 0; i < (toDoTasks.Length); i = i + 1)
+                    {
+                        if (toDoTasks[i] != "")
+                        {
+                            tempArray = tempArray.Append(toDoTasks[i]).ToArray();
+                            tempArray2 = tempArray2.Append(toDoTaskStatus[i]).ToArray();
+                        }
+                    }
+
+                    toDoTasks = tempArray;
+                    toDoTaskStatus = tempArray2;
+                    break;
+                }
             }
-
-            Console.WriteLine(tempArray);
-            toDoTasks = tempArray;
-            toDoTaskStatus = tempArray2;
-
             break;
         case "5":
             Environment.Exit(0);
