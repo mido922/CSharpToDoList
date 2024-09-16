@@ -1,10 +1,26 @@
-﻿// Console App to create a to-do list.
+// Console app to create a to-do list
+
+// Refactoring to be filebased
+
+using System.IO;
+
+string filePath = @"E:\test.txt";
+string filePath2 = @"E:\test2.txt";
+
+if (!File.Exists(filePath)) {
+    File.Create(filePath);
+}
+
+if (!File.Exists(filePath2))
+{
+    File.Create(filePath2);
+}
 
 string userInput = "";
-string[] toDoTasks = [];
-string[] toDoTaskStatus = [];
 string[] tempArray = [];
 string[] tempArray2 = [];
+string[] taskListFile;
+string[] taskStatusFile;
 int a;
 
 while (true)
@@ -21,20 +37,26 @@ while (true)
     switch (userInput)
     {
         case "1":
-            if(toDoTasks.Length == 0)
+            taskListFile = File.ReadAllLines(filePath);
+            taskStatusFile = File.ReadAllLines(filePath2);
+
+            if (taskListFile.Length == 0)
             {
                 Console.WriteLine("You have no tasks.");
                 break;
             }
             Console.WriteLine("\nHere is a list of all tasks: \n");
-            for (int i = 0; i < (toDoTasks.Length); i=i+1)
+            for (int i = 0; i < (taskListFile.Length); i = i + 1)
             {
-                Console.WriteLine($"{i}) {toDoTasks[i]}: {toDoTaskStatus[i]} ");
+                Console.WriteLine($"{i}) {taskListFile[i]}: {taskStatusFile[i]} ");
             }
             break;
 
         case "2":
-            if (toDoTasks.Length == 0)
+            taskListFile = File.ReadAllLines(filePath);
+            taskStatusFile = File.ReadAllLines(filePath2);
+
+            if (taskListFile.Length == 0)
             {
                 Console.WriteLine("You have no tasks.");
                 break;
@@ -42,9 +64,9 @@ while (true)
 
             Console.WriteLine("Which task would you like to change the status of? Type -1 to exit.");
 
-            for (int i = 0; i < toDoTasks.Length; i=i+1)
+            for (int i = 0; i < taskListFile.Length; i = i + 1)
             {
-                Console.WriteLine($"{i}) {toDoTasks[i]}: {toDoTaskStatus[i]} ");
+                Console.WriteLine($"{i}) {taskListFile[i]}: {taskStatusFile[i]}");
             }
             while (true)
             {
@@ -55,7 +77,7 @@ while (true)
                     break;
                 }
                 else if (!Int32.TryParse(userInput, out a) ||
-                        Convert.ToInt32(userInput) >= toDoTasks.Length ||
+                        Convert.ToInt32(userInput) >= taskListFile.Length ||
                         Convert.ToInt32(userInput) < 0 ||
                         userInput == ""
                         )
@@ -65,20 +87,25 @@ while (true)
                 }
                 else
                 {
-                    if (toDoTaskStatus[Convert.ToInt32(userInput)] == "Unfinished.")
+                    if (taskStatusFile[Convert.ToInt32(userInput)] == "Unfinished.")
                     {
-                        toDoTaskStatus[Convert.ToInt32(userInput)] = "Finished.";
+                        taskStatusFile[Convert.ToInt32(userInput)] = "Finished.";
                     }
-                    else if (toDoTaskStatus[Convert.ToInt32(userInput)] == "Finished.")
+                    else
                     {
-                        toDoTaskStatus[Convert.ToInt32(userInput)] = "Unfinished.";
+                        taskStatusFile[Convert.ToInt32(userInput)] = "Unfinished.";
                     }
+                    File.WriteAllLines(filePath2, taskStatusFile);
                     break;
                 }
             }
             break;
         case "3":
             Console.WriteLine("What would you like to add to your To-Do List? Type -1 to exit.\n");
+
+
+            taskListFile = File.ReadAllLines(filePath);
+            taskStatusFile = File.ReadAllLines(filePath2);
 
             while (true)
             {
@@ -97,22 +124,30 @@ while (true)
                 }
                 else
                 {
-                    toDoTasks = toDoTasks.Append(userInput).ToArray();
-                    toDoTaskStatus = toDoTaskStatus.Append("Unfinished.").ToArray();
+                    taskListFile = taskListFile.Append(userInput).ToArray();
+                    taskStatusFile = taskStatusFile.Append("Unfinished.").ToArray();
+
+
+                    File.WriteAllLines(filePath, taskListFile);
+                    File.WriteAllLines(filePath2, taskStatusFile);
                     break;
                 }
             }
             break;
         case "4":
-            if (toDoTasks.Length == 0)
+
+            taskListFile = File.ReadAllLines(filePath);
+            taskStatusFile = File.ReadAllLines(filePath2);
+
+            if (taskListFile.Length == 0)
             {
                 Console.WriteLine("You have no tasks.");
                 break;
             }
             Console.WriteLine("What would you like to remove from your To-Do List? Type -1 to exit.\n");
-            for (int i = 0; i < (toDoTasks.Length); i = i + 1)
+            for (int i = 0; i < taskListFile.Length; i = i + 1)
             {
-                Console.WriteLine($"{i}) {toDoTasks[i]}: {toDoTaskStatus[i]} ");
+                Console.WriteLine($"{i}) {taskListFile[i]}: {taskStatusFile[i]} ");
             }
 
             while (true)
@@ -124,7 +159,7 @@ while (true)
                     break;
                 }
                 if (!Int32.TryParse(userInput, out a) ||
-                    Convert.ToInt32(userInput) >= toDoTasks.Length ||
+                    Convert.ToInt32(userInput) >= taskListFile.Length ||
                     Convert.ToInt32(userInput) < 0 ||
                     userInput == ""
                     )
@@ -134,20 +169,25 @@ while (true)
                 }
                 else
                 {
-                    toDoTasks[Convert.ToInt32(userInput)] = "";
-                    toDoTaskStatus[Convert.ToInt32(userInput)] = "";
 
-                    for (int i = 0; i < (toDoTasks.Length); i = i + 1)
+                    taskListFile[Convert.ToInt32(userInput)] = "";
+                    taskStatusFile[Convert.ToInt32(userInput)] = "";
+
+                    for (int i = 0; i < (taskStatusFile.Length); i = i + 1)
                     {
-                        if (toDoTasks[i] != "")
+                        if (taskStatusFile[i] != "")
                         {
-                            tempArray = tempArray.Append(toDoTasks[i]).ToArray();
-                            tempArray2 = tempArray2.Append(toDoTaskStatus[i]).ToArray();
+                            tempArray = tempArray.Append(taskListFile[i]).ToArray();
+                            tempArray2 = tempArray2.Append(taskStatusFile[i]).ToArray();
                         }
                     }
 
-                    toDoTasks = tempArray;
-                    toDoTaskStatus = tempArray2;
+                    taskListFile = tempArray;
+                    taskStatusFile = tempArray2;
+
+                    File.WriteAllLines(filePath, taskListFile);
+                    File.WriteAllLines(filePath2, taskStatusFile);
+
                     break;
                 }
             }
