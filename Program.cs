@@ -1,31 +1,27 @@
-// Console app to create a to-do list
-
-// Refactoring to be filebased
-
 using System.IO;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
 string filePath = @"E:\test.txt";
-string filePath2 = @"E:\test2.txt";
 
 if (!File.Exists(filePath)) {
     File.Create(filePath);
 }
 
-if (!File.Exists(filePath2))
-{
-    File.Create(filePath2);
-}
+//string myJson = JsonConvert.SerializeObject(taskList);
+//Console.Write(myJson);
+//Console.Write(JsonConvert.DeserializeObject(myJson));
 
-string userInput = "";
-string[] tempArray = [];
-string[] tempArray2 = [];
-string[] taskListFile;
-string[] taskStatusFile;
+string userInput;
+string jsonList;
 int a;
+
+List<toDoTask> taskList = new List<toDoTask>();
 
 while (true)
 {
-    Console.WriteLine("Welcome to the Blackstone To-Do List management app. Please select a choice: \n" +
+    Console.WriteLine("----------------\n" +
+        "Welcome to the Blackstone To-Do List management app. Please select a choice: \n" +
         "1) View all To-Do tasks. \n" +
         "2) Mark or Unmark a task. \n" +
         "3) Add a task. \n" +
@@ -37,75 +33,52 @@ while (true)
     switch (userInput)
     {
         case "1":
-            taskListFile = File.ReadAllLines(filePath);
-            taskStatusFile = File.ReadAllLines(filePath2);
 
-            if (taskListFile.Length == 0)
+            readJsonFromFile();
+
+            if (taskList.Count == 0)
             {
                 Console.WriteLine("You have no tasks.");
                 break;
             }
-            Console.WriteLine("\nHere is a list of all tasks: \n");
-            for (int i = 0; i < (taskListFile.Length); i = i + 1)
-            {
-                Console.WriteLine($"{i}) {taskListFile[i]}: {taskStatusFile[i]} ");
-            }
+
+            Console.WriteLine("Here is a list of all tasks: \n");
+            displayTasks();
             break;
-
         case "2":
-            taskListFile = File.ReadAllLines(filePath);
-            taskStatusFile = File.ReadAllLines(filePath2);
+            readJsonFromFile();
 
-            if (taskListFile.Length == 0)
+            if (taskList.Count == 0)
             {
                 Console.WriteLine("You have no tasks.");
                 break;
             }
 
-            Console.WriteLine("Which task would you like to change the status of? Type -1 to exit.");
+            Console.WriteLine("Which task would you like to change the status of? " +
+                                "Type -1 to exit.");
+            displayTasks();
 
-            for (int i = 0; i < taskListFile.Length; i = i + 1)
+            if(!ValidateUserInput())
             {
-                Console.WriteLine($"{i}) {taskListFile[i]}: {taskStatusFile[i]}");
+                break;
             }
-            while (true)
-            {
-                userInput = Console.ReadLine();
 
-                if (userInput == "-1")
-                {
-                    break;
-                }
-                else if (!Int32.TryParse(userInput, out a) ||
-                        Convert.ToInt32(userInput) >= taskListFile.Length ||
-                        Convert.ToInt32(userInput) < 0 ||
-                        userInput == ""
-                        )
-                {
-                    Console.WriteLine("That's not a valid input. Please try again.");
-                    continue;
-                }
-                else
-                {
-                    if (taskStatusFile[Convert.ToInt32(userInput)] == "Unfinished.")
+            if (taskList[Convert.ToInt32(userInput)].Status == "Unfinished.")
                     {
-                        taskStatusFile[Convert.ToInt32(userInput)] = "Finished.";
+                        taskList[Convert.ToInt32(userInput)].Status = "Finished.";
                     }
-                    else
+            else
                     {
-                        taskStatusFile[Convert.ToInt32(userInput)] = "Unfinished.";
+                        taskList[Convert.ToInt32(userInput)].Status = "Unfinished.";
                     }
-                    File.WriteAllLines(filePath2, taskStatusFile);
-                    break;
-                }
-            }
+
+            writeJsonToFile();
+
             break;
         case "3":
+            readJsonFromFile();
+
             Console.WriteLine("What would you like to add to your To-Do List? Type -1 to exit.\n");
-
-
-            taskListFile = File.ReadAllLines(filePath);
-            taskStatusFile = File.ReadAllLines(filePath2);
 
             while (true)
             {
@@ -124,73 +97,34 @@ while (true)
                 }
                 else
                 {
-                    taskListFile = taskListFile.Append(userInput).ToArray();
-                    taskStatusFile = taskStatusFile.Append("Unfinished.").ToArray();
-
-
-                    File.WriteAllLines(filePath, taskListFile);
-                    File.WriteAllLines(filePath2, taskStatusFile);
+                    taskList.Add(new toDoTask(userInput, "Unfinished."));
                     break;
                 }
             }
+
+            writeJsonToFile();
+
             break;
         case "4":
+            readJsonFromFile();
 
-            taskListFile = File.ReadAllLines(filePath);
-            taskStatusFile = File.ReadAllLines(filePath2);
-
-            if (taskListFile.Length == 0)
+            if (taskList.Count == 0)
             {
                 Console.WriteLine("You have no tasks.");
                 break;
             }
+
             Console.WriteLine("What would you like to remove from your To-Do List? Type -1 to exit.\n");
-            for (int i = 0; i < taskListFile.Length; i = i + 1)
+            displayTasks();
+
+            if (!ValidateUserInput())
             {
-                Console.WriteLine($"{i}) {taskListFile[i]}: {taskStatusFile[i]} ");
+                break;
             }
 
-            while (true)
-            {
-                userInput = Console.ReadLine();
+            taskList.RemoveAt(Convert.ToInt32(userInput));
 
-                if (userInput == "-1")
-                {
-                    break;
-                }
-                if (!Int32.TryParse(userInput, out a) ||
-                    Convert.ToInt32(userInput) >= taskListFile.Length ||
-                    Convert.ToInt32(userInput) < 0 ||
-                    userInput == ""
-                    )
-                {
-                    Console.WriteLine("That's not a valid input. Please try again.");
-                    continue;
-                }
-                else
-                {
-
-                    taskListFile[Convert.ToInt32(userInput)] = "";
-                    taskStatusFile[Convert.ToInt32(userInput)] = "";
-
-                    for (int i = 0; i < (taskStatusFile.Length); i = i + 1)
-                    {
-                        if (taskStatusFile[i] != "")
-                        {
-                            tempArray = tempArray.Append(taskListFile[i]).ToArray();
-                            tempArray2 = tempArray2.Append(taskStatusFile[i]).ToArray();
-                        }
-                    }
-
-                    taskListFile = tempArray;
-                    taskStatusFile = tempArray2;
-
-                    File.WriteAllLines(filePath, taskListFile);
-                    File.WriteAllLines(filePath2, taskStatusFile);
-
-                    break;
-                }
-            }
+            writeJsonToFile();
             break;
         case "5":
             Environment.Exit(0);
@@ -198,5 +132,63 @@ while (true)
         default:
             Console.WriteLine("That's not a valid input. Please try again.");
             continue;
+    }
+}
+
+void displayTasks()
+{
+    taskList = JsonConvert.DeserializeObject<List<toDoTask>>(File.ReadAllText(filePath));
+
+    for (int i = 0; i < taskList.Count; i = i + 1)
+    {
+        Console.WriteLine($"{i}) {taskList[i].Name}: {taskList[i].Status}");
+    }
+}
+
+void readJsonFromFile()
+{
+    taskList = JsonConvert.DeserializeObject<List<toDoTask>>(File.ReadAllText(filePath));
+}
+
+void writeJsonToFile()
+{
+    jsonList = JsonConvert.SerializeObject(taskList);
+    File.WriteAllText(filePath, jsonList);
+}
+
+Boolean ValidateUserInput()
+{
+    while (true)
+    {
+        userInput = Console.ReadLine();
+
+        if (userInput == "-1")
+        {
+            return (false);
+        }
+        else if (!Int32.TryParse(userInput, out a) ||
+                Convert.ToInt32(userInput) >= taskList.Count ||
+                Convert.ToInt32(userInput) < 0 ||
+                userInput == ""
+                )
+        {
+            Console.WriteLine("That's not a valid input. Please try again.");
+            continue;
+        }
+        else
+        {
+            return true;
+        }
+    }
+}
+
+public class toDoTask
+{
+    public string Name;
+    public string Status;
+    public toDoTask(string newName, string newStatus)
+    {
+        Name = newName;
+        Status = newStatus;
     }
 }
