@@ -13,6 +13,7 @@ if (!File.Exists(filePath)) {
 
 string userInput;
 int a;
+
 List<toDoTask> taskList = new List<toDoTask>();
 
 while (true)
